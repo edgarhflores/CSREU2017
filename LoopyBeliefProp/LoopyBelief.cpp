@@ -14,8 +14,11 @@
 #include <cmath>
 #include <string>
 #include <sstream>
-const int windowSize = 5;
-const int maxOffset = 15;
+#include <vector>
+const int WINDOW_SIZE = 5;
+const int MAX_OFF_SET = 15;
+const int LAMDA = 20;
+const int TRUNCATE = 2;
 int numOfFiles = 1;
 int imageWidthLeft;
 int imageWidthRight;
@@ -24,6 +27,20 @@ int rightSize;
 int* leftImageArray;
 int* rightImageArray;
 using namespace std;
+
+//********************************************************************
+//Method:	smoothnessCost
+//Description:	calculates smoothnessCost
+//Parameters:  	
+//Returns:     	nothing
+//Calls:       	nothing
+//Globals:	none
+int smoothnessCost(int k, int kPrime){
+    int n = abs (k - kPrime);
+    int smoothnessCost;
+    smoothnessCost = LAMDA * min(n,TRUNCATE);
+    return smoothnessCost;
+}
 
 //********************************************************************
 //Method:	getIndex
@@ -54,12 +71,12 @@ int getIndex(int x, int y, int imageWidth) {
 //Calls:       	nothing
 //Globals:	none
 
-int dataCost(int x, int y, int offset, int leftImage[], int rightImage[]) {
+int dataCost(int x, int y, int label, int leftImage[], int rightImage[]) {
     int sumOfAbsDiff;
-    int border = windowSize / 2;
+    int border = WINDOW_SIZE / 2;
     for (int i = x - border; i <= x + border; i++) {
         for (int j = y - border; j < y + border; j++) {
-            sumOfAbsDiff = abs(leftImage[getIndex(i, j, imageWidthLeft)] - rightImage[getIndex(i - offset, j, imageWidthRight)]);
+            sumOfAbsDiff = abs(leftImage[getIndex(i, j, imageWidthLeft)] - rightImage[getIndex(i - label, j, imageWidthRight)]);
         }//inner for loop
     }//outer for loop
     return sumOfAbsDiff;
@@ -217,26 +234,32 @@ int main() {
         cout << endl;
         switch (userAns) {
             case 1:
-                cout << "Enter value for x: " << endl;
-                getline(cin, input);
-                stringstream(input) >> x;
-                cout << "Enter value for y: " << endl;
-                getline(cin, input);
-                stringstream(input) >> y;
-                cout << "Calculating the dataCost...\n" << endl;
-                int dataCostSum;
-                //for (int offset = 0; offset < maxOffset; offset++) {
-                    dataCostSum += dataCost(x, y, offset, leftImageArray, rightImageArray);
-                //}
-                cout << "Data cost for one window for an offset of 0: " << dataCostSum << endl;
-                cout << endl;
+                
+//                cout << "Enter value for x: " << endl;
+//                getline(cin, input);
+//                stringstream(input) >> x;
+//                cout << "Enter value for y: " << endl;
+//                getline(cin, input);
+//                stringstream(input) >> y;
+//                cout << "Calculating the dataCost...\n" << endl;
+//                int dataCostSum;
+//                for (int offset = 0; offset < MAX_OFF_SET; offset++) {
+//                    dataCostSum += dataCost(x, y, offset, leftImageArray, rightImageArray);
+//                }
+//                cout << "Data cost for a window of 5x5: " << dataCostSum << endl;
+//                cout << endl;
                 break;
             case 2:
                 exit(0);
             default:
                 cout << "Input not valid. Please enter either 1 or 2.\n" << endl;
         }// end of switch  
-    }
+    }  
     return 0;
     //Trying out the new git commands
 }
+
+class node{
+    int grayScaleValue;
+    
+};
