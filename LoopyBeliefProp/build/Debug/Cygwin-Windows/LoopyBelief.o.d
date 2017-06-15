@@ -1,1 +1,3 @@
-build/Debug/Cygwin-Windows/LoopyBelief.o: LoopyBelief.cpp
+build/Debug/Cygwin-Windows/LoopyBelief.o: LoopyBelief.cpp node.h
+
+node.h:

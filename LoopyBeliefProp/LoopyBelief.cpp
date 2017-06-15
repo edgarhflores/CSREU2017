@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "node.h"
 const int WINDOW_SIZE = 5;
 const int MAX_OFF_SET = 15;
 const int LAMDA = 20;
@@ -224,6 +225,7 @@ int main() {
     int x;
     int y;
     int offset = 0;
+    node firstNode (45);
     cout << "Loopy Belief Propagation: Edgar Flores\n" << endl;
     setFiles();
     while (loop) {
@@ -233,7 +235,9 @@ int main() {
         stringstream(input) >> userAns;
         cout << endl;
         switch (userAns) {
-            case 1:
+            case 1:            
+                cout << "The value of the firstNode is: " << firstNode.getGrayScaleValue() << endl;
+                
                 
 //                cout << "Enter value for x: " << endl;
 //                getline(cin, input);
@@ -258,8 +262,3 @@ int main() {
     return 0;
     //Trying out the new git commands
 }
-
-class node{
-    int grayScaleValue;
-    
-};
