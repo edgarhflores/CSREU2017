@@ -2,23 +2,29 @@
 #ifndef NODE_H
 #define NODE_H
 class node {
-public:    
-    
+public: 
+    //Constructors
     node();
-    node(int grayScaleValue);  
-    int getGrayScaleValue (){return grayScaleValue;}
-    std::vector<int> getBelief(){return beliefs;}
-    std::vector<int> getMsgTop(){return msgTop;}
-    std::vector<int> getMsgBottom(){return msgBottom;}
-    std::vector<int> getMsgRight(){return msgRight;}
-    std::vector<int> getMsgLeft(){return msgLeft;}
-    
+    node(int grayScaleValue); 
+    //Getters
+    int getGrayScaleValue (){return grayScaleValue;}  
+    double getBelief(int k);
+    double getMsgTop(int k);
+    double getMsgBottom(int k);
+    double getMsgLeft(int k);
+    double getMsgRight(int k);
+    //Setters
+    void setBelief(int k, double belief);
+    void setMsgTop(int k, double msg);
+    void setMsgBottom(int k, double msg);
+    void setMsgLeft(int k, double msg);
+    void setMsgRight(int k, double msg);    
 private:
     int grayScaleValue;
-    std::vector<int> beliefs;
-    std::vector<int> msgTop;
-    std::vector<int> msgBottom;
-    std::vector<int> msgRight;
-    std::vector<int> msgLeft;
+    std::vector<double> beliefs;
+    std::vector<double> msgTop;
+    std::vector<double> msgBottom;
+    std::vector<double> msgRight;
+    std::vector<double> msgLeft;
 };
 #endif

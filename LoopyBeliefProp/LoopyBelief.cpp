@@ -2,7 +2,7 @@
 //Description:          Single array implementation of loopy belief propagation
 //Author:		Edgar Flores
 //Started:              6/6/2017
-//Revised:		6/12/2017
+//Revised:		6/16/2017
 //Language:		C++
 //IDE:			NetBeans 8.2
 //Notes:		none
@@ -27,6 +27,7 @@ int leftSize;
 int rightSize;
 int* leftImageArray;
 int* rightImageArray;
+node* leftImageNodes;
 using namespace std;
 
 //********************************************************************
@@ -98,6 +99,14 @@ void printArray(int array[], int size) {
     }
 }
 
+void printNodeArray(node array[], int size) {
+    for (int index = 0; index < size; index++) {
+        node newNode;
+        newNode = node (array[index]);
+        cout << newNode.getGrayScaleValue() << endl;
+    }
+}
+
 //********************************************************************
 //Method:	getSize
 //Description:	this method calculates the width and height of an image 
@@ -140,10 +149,19 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
     string input;
     for (int i = 0; i < size; i++) {
         getline(fileObj, input);
-        stringstream number(input);
-        number >> array[i];
-    }
-}
+        stringstream value(input);
+        value >> array[i];
+    }// End of for loop
+}// End of putValuesIntoArray function
+
+void createLeftNodeArray(int *array, int size, node *nodeArray) {
+    int value;
+    for (int i = 0; i < size; i++) {
+        value =  array[i];
+        node newNode(value);
+        nodeArray[i] = newNode;
+    }// End of for loop
+}// End of createLeftNodeArray function
 
 //********************************************************************
 //Method:	putValuesIntoArray
@@ -190,10 +208,12 @@ void setFiles() {
             }// end of switch       
         } else {
             cout << "Creating image array of PGM file...\n" << endl;
-            if (numOfFiles == 1) {
+            if (numOfFiles == 1) {              
                 leftSize = getSize(fileObj);
                 leftImageArray = new int[leftSize];
+                leftImageNodes = new node[leftSize];
                 putValuesIntoArray(leftImageArray, fileObj, leftSize);
+                createLeftNodeArray(leftImageArray, leftSize, leftImageNodes);
                 cout << "The left image array was created\n" << endl;
             } else {
                 rightSize = getSize(fileObj);
@@ -224,8 +244,6 @@ int main() {
     bool loop = true;
     int x;
     int y;
-    int offset = 0;
-    node firstNode (45);
     cout << "Loopy Belief Propagation: Edgar Flores\n" << endl;
     setFiles();
     while (loop) {
@@ -235,10 +253,8 @@ int main() {
         stringstream(input) >> userAns;
         cout << endl;
         switch (userAns) {
-            case 1:            
-                cout << "The value of the firstNode is: " << firstNode.getGrayScaleValue() << endl;
-                
-                
+            case 1:
+                printNodeArray(leftImageNodes, leftSize);
 //                cout << "Enter value for x: " << endl;
 //                getline(cin, input);
 //                stringstream(input) >> x;
@@ -247,7 +263,7 @@ int main() {
 //                stringstream(input) >> y;
 //                cout << "Calculating the dataCost...\n" << endl;
 //                int dataCostSum;
-//                for (int offset = 0; offset < MAX_OFF_SET; offset++) {
+//                for (int offset = 0; offset <= MAX_OFF_SET; offset++) {
 //                    dataCostSum += dataCost(x, y, offset, leftImageArray, rightImageArray);
 //                }
 //                cout << "Data cost for a window of 5x5: " << dataCostSum << endl;
@@ -258,7 +274,6 @@ int main() {
             default:
                 cout << "Input not valid. Please enter either 1 or 2.\n" << endl;
         }// end of switch  
-    }  
+    }//End of while loop 
     return 0;
-    //Trying out the new git commands
 }
