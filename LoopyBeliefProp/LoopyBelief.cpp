@@ -30,6 +30,21 @@ int* rightImageArray;
 node* leftImageNodes;
 using namespace std;
 
+void updateMessage (int i){
+    
+}
+
+void updateBelief(int i){
+
+}
+
+void loopyBP(){
+    for (int i = 0; i < leftSize; i++) {
+        updateMessage(i);
+        updateBelief(i);
+    }
+
+}
 //********************************************************************
 //Method:	smoothnessCost
 //Description:	calculates smoothnessCost
@@ -254,7 +269,17 @@ int main() {
         cout << endl;
         switch (userAns) {
             case 1:
-                printNodeArray(leftImageNodes, leftSize);
+
+                break;
+            case 2:
+                exit(0);
+            default:
+                cout << "Input not valid. Please enter either 1 or 2.\n" << endl;
+        }// end of switch  
+    }//End of while loop 
+    return 0;
+}
+// Calculating the dataCost
 //                cout << "Enter value for x: " << endl;
 //                getline(cin, input);
 //                stringstream(input) >> x;
@@ -268,12 +293,3 @@ int main() {
 //                }
 //                cout << "Data cost for a window of 5x5: " << dataCostSum << endl;
 //                cout << endl;
-                break;
-            case 2:
-                exit(0);
-            default:
-                cout << "Input not valid. Please enter either 1 or 2.\n" << endl;
-        }// end of switch  
-    }//End of while loop 
-    return 0;
-}
