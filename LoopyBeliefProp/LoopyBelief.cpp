@@ -178,16 +178,14 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
 }// End of putValuesIntoArray function
 
 void createPGMImageArray(ifstream& PGM_File, string fileName) {
-    cout << "Creating image array of " << fileName << "...\n" << endl;
+    cout << "Creating image array of " << fileName << "..." << endl;
     if (numOfFiles == 1) {
         leftSize = getSize(PGM_File);
-        cout << "The size of left size is: " << leftSize << endl;
         leftImageArray = new int[leftSize];
         putValuesIntoArray(leftImageArray, PGM_File, leftSize);
         cout << "The left image array was created\n" << endl;
     } else {
         rightSize = getSize(PGM_File);
-        cout << "The size of right size is: " << rightSize << endl;
         rightImageArray = new int[rightSize];
         putValuesIntoArray(rightImageArray, PGM_File, rightSize);
         cout << "The right image array was created\n" << endl;
@@ -224,82 +222,131 @@ void updateMessage(int x, int y) {
     int left = getIndex(x - 1, y, leftImageWidth);
     int right = getIndex(x + 1, y, leftImageWidth);
 
+    int tempKPrime;
+
+    if (x == 36 && y == 89) {
+        cout << "UPDATE for pixel (" << x << ", " << y << "): " << endl;
+    } 
     //update top message
-    cout << "Updating top message vector on offset of 0 - 15..." << endl;
-    cout << endl;
-    for (int k = 0; k < MAX_OFF_SET; k++) {
-        cout << endl;
-        cout << "Offset: " << k << endl;
-        cout << endl;
+    for (int k = 0; k <= MAX_OFF_SET; k++) {
         minVal = numeric_limits<int>::max();
         for (int kPrime = 0; kPrime < MAX_OFF_SET; kPrime++) {
-            cout << "The sum of : " << endl;
-            cout << dataCost(x, y, kPrime) << " (dataCost)"  << " + " << endl;
-            cout << smoothnessCost(k, kPrime)<<  " (smoothnessCost)"  << " + " << endl;
-            cout <<  prevData[bot].getMsgTop(kPrime)  << " (MsgBot)"  << " + " << endl;
-            cout << prevData[left].getMsgRight(kPrime)<< " (MsgLeft) "  << " + " << endl;
-            cout << prevData[right].getMsgLeft(kPrime) <<   " (MsgRight) " << " + " << endl;
             int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
                     prevData[bot].getMsgTop(kPrime) +
                     prevData[left].getMsgRight(kPrime) +
                     prevData[right].getMsgLeft(kPrime);
             if (tempMsg < minVal) {
                 minVal = tempMsg;
-            }//End of if statement  
+                tempKPrime = kPrime;
+            }//End of if statement
         }//End of inner loop
-
-        cout << "min value is: " << minVal << endl;
-
         currData[getIndex(x, y, leftImageWidth)].setMsgTop(k, minVal);
-        cout << " The message at currData [" << getIndex(x, y, leftImageWidth) << "] for k =" << k << " is : " << currData[getIndex(x, y, leftImageWidth)].getMsgTop(k) << endl;
+        if (x == 36 && y == 89) {
+            cout << "MsgTop[" << k << "] = " << minVal;
+            cout << " [Calculation : " << dataCost(x, y, tempKPrime) << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBot)" << " + ";
+            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            cout << " = " << minVal << "(minVal)]" << endl;
+        }
+        if (x == 36 && y == 89 && k == 15) {
+            cout << endl;
+            cout << "Waiting on other pixels for current iteration..." << endl;
+            cout << endl;
+        }
     }//End of outer loop
-    cout << "Updating top message vector 0 - 15 complete" << endl;
-
-    //    //update bottom message
-    //    for (int k = 0; k < MAX_OFF_SET; k++) {
-    //        minVal = numeric_limits<int>::max();
-    //        for (int kPrime = 0; kPrime < 15; kPrime++) {
-    //            int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
-    //                    prevData[top].getMsgBottom(kPrime) +
-    //                    prevData[left].getMsgRight(kPrime) +
-    //                    prevData[right].getMsgLeft(kPrime);
-    //            if (tempMsg < minVal) {
-    //                minVal = tempMsg;
-    //            }//End of if statement      
-    //        }//End of inner loop
-    //        currData[getIndex(x, y, leftImageWidth)].setMsgBottom(k, minVal);
-    //    }//End of outer loop
-    //    cout << "Updating top message vector 0 - 15 complete" << endl;
-
-    //        //update left message
-    //        for (int k = 0; k < MAX_OFF_SET; k++) {
-    //            minVal = numeric_limits<int>::max();
-    //            for (int kPrime = 0; kPrime < 15; kPrime++) {
-    //                int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
-    //                        prevData[top].getMsgBottom(kPrime) +
-    //                        prevData[bot].getMsgTop(kPrime) +
-    //                        prevData[right].getMsgLeft(kPrime);
-    //                if (tempMsg < minVal) {
-    //                    minVal = tempMsg;
-    //                }//End of if statement     
-    //            }//End of inner loop
-    //            currData[getIndex(x, y, leftImageWidth)].setMsgLeft(k, minVal);
-    //        }//End of outer loop
-    //    
-    //        //update right message
-    //        for (int k = 0; k < MAX_OFF_SET; k++) {
-    //            minVal = numeric_limits<int>::max();
-    //            for (int kPrime = 0; kPrime < 15; kPrime++) {
-    //                int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
-    //                        prevData[top].getMsgBottom(kPrime) +
-    //                        prevData[bot].getMsgTop(kPrime) +
-    //                        prevData[left].getMsgRight(kPrime);
-    //                if (tempMsg < minVal) {
-    //                    minVal = tempMsg;
-    //                }//End of if statement     
-    //            }//End of inner loop
-    //            currData[getIndex(x, y, leftImageWidth)].setMsgRight(k, minVal);
-    //        }//End of outer loop
+    cout<<endl;
+    //update bottom message
+    for (int k = 0; k < MAX_OFF_SET; k++) {
+        minVal = numeric_limits<int>::max();
+        for (int kPrime = 0; kPrime < 15; kPrime++) {
+            int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
+                    prevData[top].getMsgBottom(kPrime) +
+                    prevData[left].getMsgRight(kPrime) +
+                    prevData[right].getMsgLeft(kPrime);
+            if (tempMsg < minVal) {
+                minVal = tempMsg;
+                tempKPrime = kPrime;
+            }//End of if statement      
+        }//End of inner loop
+        currData[getIndex(x, y, leftImageWidth)].setMsgBottom(k, minVal);
+        if (x == 36 && y == 89) {
+            cout << "MsgBottom[" << k << "] = " << minVal;
+            cout << " [Calculation : " << dataCost(x, y, tempKPrime) << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            cout << " = " << minVal << "(minVal)]" << endl;
+        }
+        if (x == 36 && y == 89 && k == 15) {
+            cout << endl;
+            cout << "Waiting on other pixels for current iteration..." << endl;
+            cout << endl;
+        }
+    }//End of outer loop
+    cout<<endl;
+            //update left message
+            for (int k = 0; k < MAX_OFF_SET; k++) {
+                minVal = numeric_limits<int>::max();
+                for (int kPrime = 0; kPrime < 15; kPrime++) {
+                    int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
+                            prevData[top].getMsgBottom(kPrime) +
+                            prevData[bot].getMsgTop(kPrime) +
+                            prevData[right].getMsgLeft(kPrime);
+                    if (tempMsg < minVal) {
+                        minVal = tempMsg;
+                        tempKPrime = kPrime;
+                    }//End of if statement     
+                }//End of inner loop
+                currData[getIndex(x, y, leftImageWidth)].setMsgLeft(k, minVal);
+                        if (x == 36 && y == 89) {
+            cout << "MsgLeft[" << k << "] = " << minVal;
+            cout << " [Calculation : " << dataCost(x, y, tempKPrime) << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) " << " + ";
+            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            cout << " = " << minVal << "(minVal)]" << endl;
+        }
+        if (x == 36 && y == 89 && k == 15) {
+            cout << endl;
+            cout << "Waiting on other pixels for current iteration..." << endl;
+            cout << endl;
+        }
+            }//End of outer loop
+        cout<<endl;
+            //update right message
+            for (int k = 0; k < MAX_OFF_SET; k++) {
+                minVal = numeric_limits<int>::max();
+                for (int kPrime = 0; kPrime < 15; kPrime++) {
+                    int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
+                            prevData[top].getMsgBottom(kPrime) +
+                            prevData[bot].getMsgTop(kPrime) +
+                            prevData[left].getMsgRight(kPrime);
+                    if (tempMsg < minVal) {
+                        minVal = tempMsg;
+                        tempKPrime = kPrime;
+                    }//End of if statement     
+                }//End of inner loop
+                currData[getIndex(x, y, leftImageWidth)].setMsgRight(k, minVal);        
+                if (x == 36 && y == 89) {
+            cout << "MsgRight[" << k << "] = " << minVal;
+            cout << " [Calculation : " << dataCost(x, y, tempKPrime) << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) " << " + ";
+            cout << " = " << minVal << "(minVal)]" << endl;
+        }
+        if (x == 36 && y == 89 && k == 15) {
+            cout << endl;
+            cout << "Waiting on other pixels for current iteration..." << endl;
+            cout << endl;
+        }
+                
+            }//End of outer loop
 
 }// End of updateMessage
 
@@ -320,9 +367,9 @@ void updateBelief(int x, int y) {
 }
 
 void loopyBP() {
-    cout << "RUNNING loopyBp..." << endl;
+    cout << "RUNNING Loopy Belief Propagation..." << endl;
 
-    int iterations = 1;
+    int iterations = 15;
 
     currData = new node[leftSize];
     prevData = new node[leftSize];
@@ -330,14 +377,13 @@ void loopyBP() {
 
     int border = (WINDOW_SIZE / 2) + MAX_OFF_SET;
 
-    cout << "Border = " << border << endl;
     cout << endl;
-    cout << "Working on " << iterations << " iterations... " << endl;
-    cout << endl;
+    cout << "Total iterations : " << iterations << endl;
     for (int i = 0; i <= iterations; i++) {
         //need to loop through x and y values 
-        cout << "Working on pixels for iteration " << i << endl;
-
+        cout << endl;
+        cout << "Updating topMsg[] & bottomMsg[] for iteration " << i << "... " << endl;
+        cout << endl;
         for (int x = border; x < leftImageWidth - border; x++) {
             for (int y = border; y < leftImageHeight - border; y++) {
                 //swap pointers
@@ -345,17 +391,16 @@ void loopyBP() {
                 prevData = currData;
                 currData = tempData;
                 //update data
-                if (x == 36 && y == 89) {
-                    cout << "working on update message for pixel (" << x << ", " << y << ")..." << endl;
-                    updateMessage(x, y);
-                    cout << "Update message for pixel (" << x << ", " << y << ") COMPLETE. " << endl;
-                    cout << endl;
-                }
+                updateMessage(x, y);
                 //updateBelief(x,y);
             }// End of for loop for y
         }// End of for loop for x
+        cout << "Iteration " << i << " COMPLETE" << endl;
     }//End of for loop for iterations
-    cout << "loopyBp COMPLETE." << endl;
+    cout << endl;
+    cout << "All iterations are COMPLETE." << endl;
+    cout << endl;
+    cout << "Loopy Belief Propagation COMPLETE." << endl;
 }// End of loopyBP function
 //********************************************************************
 //Method:	main
