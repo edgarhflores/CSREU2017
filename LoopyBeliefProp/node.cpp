@@ -9,43 +9,43 @@ node::node(int gsv) : beliefs (16,0), msgTop(16,0), msgBottom(16,0), msgRight(16
 }
 
 //Getters
-double node::getBelief(int k) {
+float node::getBelief(int k) {
     return beliefs.at(k);
 }
 
-double node::getMsgTop(int k) {
+float node::getMsgTop(int k) {
     return msgTop.at(k);
 }
 
-double node::getMsgBottom(int k) {
+float node::getMsgBottom(int k) {
     return msgBottom.at(k);
 }
 
-double node::getMsgLeft(int k) {
+float node::getMsgLeft(int k) {
     return msgLeft.at(k);
 }
 
-double node::getMsgRight(int k) {
+float node::getMsgRight(int k) {
     return msgRight.at(k);
 }
 
 //Setters
-void node::setBelief(int k, double belief) {
+void node::setBelief(int k, float belief) {
     beliefs.at(k) = belief;
 }
 
-void node::setMsgTop(int k, double msg) {
+void node::setMsgTop(int k, float msg) {
     msgTop.at(k) = msg;
 }
 
-void node::setMsgBottom(int k, double msg) {
+void node::setMsgBottom(int k, float msg) {
     msgBottom.at(k) = msg;
 }
 
-void node::setMsgLeft(int k, double msg) {
+void node::setMsgLeft(int k, float msg) {
     msgLeft.at(k) = msg;
 }
 
-void node::setMsgRight(int k, double msg) {
+void node::setMsgRight(int k, float msg) {
     msgRight.at(k) = msg;
 }

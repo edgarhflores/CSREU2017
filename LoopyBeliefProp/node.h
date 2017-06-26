@@ -8,23 +8,23 @@ public:
     node(int grayScaleValue); 
     //Getters
     int getGrayScaleValue (){return grayScaleValue;}  
-    double getBelief(int k);
-    double getMsgTop(int k);
-    double getMsgBottom(int k);
-    double getMsgLeft(int k);
-    double getMsgRight(int k);
+    float getBelief(int k);
+    float getMsgTop(int k);
+    float getMsgBottom(int k);
+    float getMsgLeft(int k);
+    float getMsgRight(int k);
     //Setters
-    void setBelief(int k, double belief);
-    void setMsgTop(int k, double msg);
-    void setMsgBottom(int k, double msg);
-    void setMsgLeft(int k, double msg);
-    void setMsgRight(int k, double msg);    
+    void setBelief(int k, float belief);
+    void setMsgTop(int k, float msg);
+    void setMsgBottom(int k, float msg);
+    void setMsgLeft(int k, float msg);
+    void setMsgRight(int k, float msg);    
 private:
     int grayScaleValue;
-    std::vector<double> beliefs;
-    std::vector<double> msgTop;
-    std::vector<double> msgBottom;
-    std::vector<double> msgRight;
-    std::vector<double> msgLeft;
+    std::vector<float> beliefs;
+    std::vector<float> msgTop;
+    std::vector<float> msgBottom;
+    std::vector<float> msgRight;
+    std::vector<float> msgLeft;
 };
 #endif
