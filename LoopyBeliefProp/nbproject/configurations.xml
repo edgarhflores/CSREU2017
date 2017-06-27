@@ -11,6 +11,8 @@
                    projectFiles="true">
       <itemPath>bowlLeft.pgm</itemPath>
       <itemPath>bowlRight.pgm</itemPath>
+      <itemPath>tutorial-tsukuba-imL.pgm</itemPath>
+      <itemPath>tutorial-tsukuba-imR.pgm</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -50,6 +52,10 @@
       </item>
       <item path="node.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="tutorial-tsukuba-imL.pgm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tutorial-tsukuba-imR.pgm" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -80,6 +86,10 @@
       <item path="node.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="node.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tutorial-tsukuba-imL.pgm" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tutorial-tsukuba-imR.pgm" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
