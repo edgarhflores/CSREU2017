@@ -59,6 +59,7 @@ using namespace std;
 //Calls:       	nothing
 //Globals:	LAMDA
 //              TRUNCATE
+
 int smoothnessCost(int k, int kPrime) {
     int n = abs(k - kPrime);
     int smoothnessCost;
@@ -76,6 +77,7 @@ int smoothnessCost(int k, int kPrime) {
 //Returns:     	index - the coordinates of single dimensional index
 //Calls:       	nothing
 //Globals:	none
+
 int getIndex(int x, int y, int imageWidth) {
     int index;
     return index = (imageWidth * y) + x;
@@ -94,12 +96,13 @@ int getIndex(int x, int y, int imageWidth) {
 //Globals:	WINDOW_SIZE
 //              imageWidthLeft
 //              imageWidthRight
+
 int dataCost(int x, int y, int kPrime) {
     int sumOfAbsDiff = 0;
     int border = WINDOW_SIZE / 2;
+    //cout << "(" <<x<< ", " << y << ")" << endl;
     for (int i = x - border; i <= x + border; i++) {
         for (int j = y - border; j <= y + border; j++) {
-            //cout << "(" <<x<< ", " << y << ")" << endl;
             sumOfAbsDiff += abs(leftImageArray[getIndex(i, j, leftImageWidth)] - rightImageArray[getIndex(i - kPrime, j, rigthImageWidth)]);
         }//inner for loop
     }//outer for loop
@@ -114,8 +117,9 @@ int dataCost(int x, int y, int kPrime) {
 //Returns:     	nothing
 //Calls:       	nothing
 //Globals:	none
+
 void printArray(int array[], int size) {
-    for (int index = 0; index < size; index++) {
+    for (int index = 0; index <= size; index++) {
         cout << array[index] << endl;
     }
 }
@@ -130,6 +134,7 @@ void printArray(int array[], int size) {
 //Globals:	imageWidthLeft
 //              imageWidthRight
 //              numOfFiles
+
 int getSize(ifstream& fileObj) {
     string input;
     int size;
@@ -160,14 +165,27 @@ int getSize(ifstream& fileObj) {
 //Returns:     	nothing 
 //Calls:       	nothing
 //Globals:	none
+
+//void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
+//    string input = " ";
+//    //for (int i = 0; i < size; i++) {
+//    for (int i = 0; i < 25; i++) {
+//        getline(fileObj, input);
+//        stringstream value(input);
+//        value >> array[i];
+//        cout << value << endl;
+//    }// End of for loop
+//}// End of putValuesIntoArray function
+
 void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
-    string input;
-    for (int i = 0; i < size; i++) {
-        getline(fileObj, input);
-        stringstream value(input);
-        value >> array[i];
-    }// End of for loop
-}// End of putValuesIntoArray function
+    int value = 0;
+    int i = 0;
+    while ( fileObj >> value){     
+        array[i] = value;
+        i++;
+    }
+    cout << "Size according to values inserted into the leftImage is : " << i << endl;
+}//End of putValuesIntoArray
 
 //********************************************************************
 //Method:	createPGMImageArray
@@ -180,6 +198,7 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
 //Globals:	left size
 //              leftImageArray
 //              rightImageArray
+
 void createPGMImageArray(ifstream& PGM_File, string fileName) {
     cout << "Creating image array of " << fileName << "..." << endl;
     if (numOfFiles == 1) {
@@ -203,6 +222,7 @@ void createPGMImageArray(ifstream& PGM_File, string fileName) {
 //Returns:     	nothing 
 //Calls:        createPGMImageArray
 //Globals:	none
+
 void openFile(string fileName) {
     ifstream PGM_File;
     cout << "Opening " << fileName << "..." << endl;
@@ -224,6 +244,7 @@ void openFile(string fileName) {
 //Returns:     	nothing 
 //Calls:        openFile
 //Globals:	none
+
 void setFiles() {
     openFile("tutorial-tsukuba-imL.pgm");
     openFile("tutorial-tsukuba-imR.pgm");
@@ -243,10 +264,9 @@ void setFiles() {
 //              MAX_OFF_SET
 //              prevData
 //              currData
+
 void updateMessage(int x, int y) {
-
     double minVal;
-
     int top = getIndex(x, y - 1, leftImageWidth);
     int bot = getIndex(x, y + 1, leftImageWidth);
     int left = getIndex(x - 1, y, leftImageWidth);
@@ -283,15 +303,15 @@ void updateMessage(int x, int y) {
         currData[getIndex(x, y, leftImageWidth)].setMsgTop(k, minVal);
 
         if (x == 36 && y == 89) {
-            cout << "MsgTop[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgTop(k)<<endl;
-//            cout << " [Calculation : ";
-//            //cout << dataCost(x, y, tempKPrime) << " + ";
-//            cout << tempDataCost << " (dataCost)" << " + ";
-//            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
-//            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBot)" << " + ";
-//            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
-//            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
-//            cout << " = " << minVal << "(minVal)]" << endl;
+            cout << "MsgTop[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgTop(k) << endl;
+            cout << " [Calculation : ";
+            //cout << dataCost(x, y, tempKPrime) << " + ";
+            cout << tempDataCost << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBot)" << " + ";
+            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            cout << " = " << minVal << "(minVal)]" << endl;
         }//End of if statement
         if (x == 36 && y == 89 && k == 15) {
             cout << endl;
@@ -322,15 +342,15 @@ void updateMessage(int x, int y) {
         currData[getIndex(x, y, leftImageWidth)].setMsgBottom(k, minVal);
 
         if (x == 36 && y == 89) {
-            cout << "MsgBottom[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgBottom(k)<<endl;
-//            cout << " [Calculation : ";
-//            //cout << dataCost(x, y, tempKPrime) << " + ";
-//            cout << tempDataCost << " (dataCost)" << " + ";
-//            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
-//            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
-//            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
-//            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
-//            cout << " = " << minVal << "(minVal)]" << endl;
+            cout << "MsgBottom[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgBottom(k) << endl;
+            cout << " [Calculation : ";
+            //cout << dataCost(x, y, tempKPrime) << " + ";
+            cout << tempDataCost << " (dataCost)" << " + ";
+            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            cout << " = " << minVal << "(minVal)]" << endl;
         }//End of if statement
         if (x == 36 && y == 89 && k == 15) {
             cout << endl;
@@ -359,15 +379,15 @@ void updateMessage(int x, int y) {
         }//End of inner loop
         currData[getIndex(x, y, leftImageWidth)].setMsgLeft(k, minVal);
         if (x == 36 && y == 89) {
-            cout << "MsgLeft[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgLeft(k)<<endl;
-//            cout << " [Calculation : ";
-//            //cout << dataCost(x, y, tempKPrime) << " + ";
-//            cout << tempDataCost << " (dataCost)" << " + ";
-//            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
-//            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
-//            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) " << " + ";
-//            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
-//            cout << " = " << minVal << "(minVal)]" << endl;
+            cout << "MsgLeft[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgLeft(k) << endl;
+            //            cout << " [Calculation : ";
+            //            //cout << dataCost(x, y, tempKPrime) << " + ";
+            //            cout << tempDataCost << " (dataCost)" << " + ";
+            //            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            //            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            //            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) " << " + ";
+            //            cout << prevData[right].getMsgLeft(tempKPrime) << " (MsgRight)";
+            //            cout << " = " << minVal << "(minVal)]" << endl;
         }
         if (x == 36 && y == 89 && k == 15) {
             cout << endl;
@@ -396,15 +416,15 @@ void updateMessage(int x, int y) {
         currData[getIndex(x, y, leftImageWidth)].setMsgRight(k, minVal);
 
         if (x == 36 && y == 89) {
-            cout << "MsgRight[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgRight(k)<<endl;
-//            cout << " [Calculation : ";
-//            //cout << dataCost(x, y, tempKPrime) << " + ";
-//            cout << tempDataCost << " (dataCost)" << " + ";
-//            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
-//            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
-//            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
-//            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) ";
-//            cout << " = " << minVal << "(minVal)]" << endl;
+            cout << "MsgRight[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgRight(k) << endl;
+            //            cout << " [Calculation : ";
+            //            //cout << dataCost(x, y, tempKPrime) << " + ";
+            //            cout << tempDataCost << " (dataCost)" << " + ";
+            //            cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost)" << " + ";
+            //            cout << prevData[top].getMsgBottom(tempKPrime) << " (MsgTop)" << " + ";
+            //            cout << prevData[left].getMsgRight(tempKPrime) << " (MsgLeft) " << " + ";
+            //            cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBottom) ";
+            //            cout << " = " << minVal << "(minVal)]" << endl;
         }//End of if statement
         if (x == 36 && y == 89 && k == 15) {
             cout << endl;
@@ -425,6 +445,7 @@ void updateMessage(int x, int y) {
 //              MAX_OFF_SET
 //              prevData
 //              currData
+
 void updateBelief(int x, int y) {
     float belief;
 
@@ -440,7 +461,7 @@ void updateBelief(int x, int y) {
         currData[getIndex(x, y, leftImageWidth)].setBelief(k, belief);
         if (x == 36 && y == 89) {
             cout << "Belief[" << k << "] = ";
-            cout << currData[getIndex(x, y, leftImageWidth)].getBelief(k)<<endl;
+            cout << currData[getIndex(x, y, leftImageWidth)].getBelief(k) << endl;
             cout << " (Calculation: ";
             cout << dataCost(x, y, k) << "(data cost) + ";
             cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
@@ -469,10 +490,11 @@ void updateBelief(int x, int y) {
 //              prevData
 //              currData
 //              tempData
+
 void loopyBP() {
     cout << "RUNNING Loopy Belief Propagation..." << endl;
 
-    int iterations = 1;
+    int iterations = 5;
 
     currData = new node[leftSize];
     prevData = new node[leftSize];
@@ -483,7 +505,7 @@ void loopyBP() {
     cout << endl;
     cout << "Total iterations : " << iterations << endl;
 
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i <= iterations; i++) {
         //need to loop through x and y values 
         cout << endl;
         cout << "Updating data for iteration " << i << "... " << endl;
@@ -515,9 +537,10 @@ void loopyBP() {
 //Returns:     	k - the index of the offset 
 //Calls:        none
 //Globals:	currData
+
 int getK(int pixel) {
     //if (pixel == getIndex(36,89, leftImageWidth)){
-        //cout << "getting k..." << endl;
+    //cout << "getting k..." << endl;
     //}//End of if statement debugging    
     int belief = numeric_limits<int>::max();
     int currentBelief;
@@ -573,7 +596,7 @@ void writeFinalDepthMapImage() {
             outFile << "\r\n";
         }//End of while loop
         cout << "Output SUCCESSFUL" << endl;
-    }else{
+    } else {
         cout << "Output FAILED" << endl;
     }// End of else statement
 }// End of writeFinalDepthMapImage
@@ -589,14 +612,36 @@ void writeFinalDepthMapImage() {
 //              putValuesIntoArray
 //Globals:	none
 
+void verifyPGMArray() {
+    bool firstNum = false;
+    bool lastNum = false;
+    firstNum = leftImageArray[0] == 2;
+    lastNum = leftImageArray[leftSize - 1] == 22;
+    cout << "Size = " << leftSize << endl;
+    cout << "the index of the last element (384, 288) = " << leftImageArray[getIndex(384, 288, leftImageWidth)] << endl;
+    if (firstNum == true)
+        cout << "The FIRST value of the PGM file is 2 " << endl;
+    else
+        cout << "The FIRST value of the PGM file is NOT 2 " << endl;
+
+    if (lastNum == true)
+        cout << "The LAST value of the PGM file is 22 " << endl;
+    else{
+        cout << "The LAST value of the PGM file is NOT 22 " << endl;
+        cout << "LAST value = " << leftImageArray[leftSize - 1];
+    }
+    
+}
+
 int main() {
     cout << "Loopy Belief Propagation: Edgar Flores\n" << endl;
     setFiles();
+    //verifyPGMArray();
     loopyBP();
     calculateOutputPixels();
-    cout << "FinalImageArray: " << endl;
+    //cout << "FinalImageArray: " << endl;
     //wait_on_enter();
-    //printArray(finalImageArray, leftSize);
+    //printArray(leftImageArray, leftSize - 1);
     writeFinalDepthMapImage();
     return 0;
 }
