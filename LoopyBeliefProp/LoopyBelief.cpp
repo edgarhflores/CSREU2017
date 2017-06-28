@@ -2,7 +2,7 @@
 //Description:          Single array implementation of loopy belief propagation
 //Author:		Edgar Flores
 //Started:              6/6/2017
-//Revised:		6/16/2017
+//Revised:		6/28/2017
 //Language:		C++
 //IDE:			NetBeans 8.2
 //Notes:		none
@@ -29,7 +29,6 @@ int leftImageWidth;
 int rigthImageWidth;
 //heights
 int leftImageHeight;
-//int rightImageHeight;
 //sizes
 int leftSize; //does this need to be a global?
 int rightSize; //does this need to be a global?
@@ -44,11 +43,11 @@ node* currData;
 
 using namespace std;
 
-inline void wait_on_enter() {
-    string dummy;
-    cout << "Enter to continue..." << std::endl;
-    getline(cin, dummy);
-}
+//inline void wait_on_enter() {
+//    string dummy;
+//    cout << "Enter to continue..." << std::endl;
+//    getline(cin, dummy);
+//}
 
 //********************************************************************
 //Method:	smoothnessCost
@@ -60,7 +59,6 @@ inline void wait_on_enter() {
 //Calls:       	nothing
 //Globals:	LAMDA
 //              TRUNCATE
-
 int smoothnessCost(int k, int kPrime) {
     int n = abs(k - kPrime);
     int smoothnessCost;
@@ -78,7 +76,6 @@ int smoothnessCost(int k, int kPrime) {
 //Returns:     	index - the coordinates of single dimensional index
 //Calls:       	nothing
 //Globals:	none
-
 int getIndex(int x, int y, int imageWidth) {
     int index;
     return index = (imageWidth * y) + x;
@@ -90,22 +87,19 @@ int getIndex(int x, int y, int imageWidth) {
 //              one window
 //Parameters:  	x - the x coordinate
 //              y - the y coordinate
-//              offset - the offset for the right image
-//              leftImage[] - the array of the left image
-//              rightImage[] - the array of the right image
+//              kPrime - the offset for the right image
 //Returns:     	sumOfAbsDiff - the sum of absolute difference for every pixel in 
 //              one window
 //Calls:       	nothing
 //Globals:	WINDOW_SIZE
 //              imageWidthLeft
 //              imageWidthRight
-
 int dataCost(int x, int y, int kPrime) {
-
-    int sumOfAbsDiff;
+    int sumOfAbsDiff = 0;
     int border = WINDOW_SIZE / 2;
     for (int i = x - border; i <= x + border; i++) {
         for (int j = y - border; j <= y + border; j++) {
+            //cout << "(" <<x<< ", " << y << ")" << endl;
             sumOfAbsDiff += abs(leftImageArray[getIndex(i, j, leftImageWidth)] - rightImageArray[getIndex(i - kPrime, j, rigthImageWidth)]);
         }//inner for loop
     }//outer for loop
@@ -120,7 +114,6 @@ int dataCost(int x, int y, int kPrime) {
 //Returns:     	nothing
 //Calls:       	nothing
 //Globals:	none
-
 void printArray(int array[], int size) {
     for (int index = 0; index < size; index++) {
         cout << array[index] << endl;
@@ -131,13 +124,12 @@ void printArray(int array[], int size) {
 //Method:	getSize
 //Description:	this method calculates the width and height of an image and sets
 //              the imageWidthLeft and imageWidthRight
-//Parameters:  	ifstream& fileObj - this is the current PGM file
+//Parameters:  	fileObj - this is the current PGM file
 //Returns:     	size - the width * height of an image in a PGM file
 //Calls:       	nothing
 //Globals:	imageWidthLeft
 //              imageWidthRight
 //              numOfFiles
-
 int getSize(ifstream& fileObj) {
     string input;
     int size;
@@ -162,13 +154,12 @@ int getSize(ifstream& fileObj) {
 //********************************************************************
 //Method:	putValuesIntoArray
 //Description:	this function puts the PGM text file into a single array 
-//Parameters:  	array[] - the array that will store the values in the PGM file
+//Parameters:  	*array - the array that will store the values in the PGM file
 //              fileObj - the PGM file
 //              size - the width * height of an image in a PGM file
 //Returns:     	nothing 
 //Calls:       	nothing
 //Globals:	none
-
 void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
     string input;
     for (int i = 0; i < size; i++) {
@@ -178,6 +169,17 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
     }// End of for loop
 }// End of putValuesIntoArray function
 
+//********************************************************************
+//Method:	createPGMImageArray
+//Description:	this function creates a 1-D array of the gray scale values in a
+//              PGM file
+//Parameters:  	PGM_File - the PGM file object
+//              fileName - the name of the PGM file
+//Returns:     	nothing 
+//Calls:       	putValuesIntoArray
+//Globals:	left size
+//              leftImageArray
+//              rightImageArray
 void createPGMImageArray(ifstream& PGM_File, string fileName) {
     cout << "Creating image array of " << fileName << "..." << endl;
     if (numOfFiles == 1) {
@@ -194,6 +196,13 @@ void createPGMImageArray(ifstream& PGM_File, string fileName) {
     numOfFiles--;
 }
 
+//********************************************************************
+//Method:	openFile
+//Description:	this function verifies whether or not a PGM file opens
+//Parameters:  	fileName - the name of the PGM file
+//Returns:     	nothing 
+//Calls:        createPGMImageArray
+//Globals:	none
 void openFile(string fileName) {
     ifstream PGM_File;
     cout << "Opening " << fileName << "..." << endl;
@@ -207,11 +216,33 @@ void openFile(string fileName) {
     }//End of else
 }// End of openFile
 
+//********************************************************************
+//Method:	setFiles
+//Description:	this function allows for the specification of the two PGM files
+//              that will be used in this program
+//Parameters:  	none
+//Returns:     	nothing 
+//Calls:        openFile
+//Globals:	none
 void setFiles() {
     openFile("tutorial-tsukuba-imL.pgm");
     openFile("tutorial-tsukuba-imR.pgm");
 }//End of setFiles
 
+//********************************************************************
+//Method:	updateMessage
+//Description:	this function updates the top, bottom, left, and right  messages
+//              of each node.
+//Parameters:  	x - the x coordinate of a pixel
+//              y - the y coordinate of a pixel
+//Returns:     	nothing 
+//Calls:        getIndex
+//              dataCost
+//              smoothnessCost
+//Globals:	leftImageWidth
+//              MAX_OFF_SET
+//              prevData
+//              currData
 void updateMessage(int x, int y) {
 
     double minVal;
@@ -382,6 +413,18 @@ void updateMessage(int x, int y) {
 
 }// End of updateMessage
 
+//********************************************************************
+//Method:	updateBelief
+//Description:	this function updates the belief of each of set for every node.
+//Parameters:  	x - the x coordinate of a pixel
+//              y - the y coordinate of a pixel
+//Returns:     	nothing 
+//Calls:        getIndex
+//              dataCost
+//Globals:	leftImageWidth
+//              MAX_OFF_SET
+//              prevData
+//              currData
 void updateBelief(int x, int y) {
     float belief;
 
@@ -398,12 +441,12 @@ void updateBelief(int x, int y) {
         if (x == 36 && y == 89) {
             cout << "Belief[" << k << "] = ";
             cout << currData[getIndex(x, y, leftImageWidth)].getBelief(k)<<endl;
-//            cout << " (Calculation: ";
-//            cout << dataCost(x, y, k) << "(data cost) + ";
-//            cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
-//            cout << prevData[bot].getMsgTop(k) << " (MsgBot) + ";
-//            cout << prevData[left].getMsgRight(k) << " (MsgLeft) + ";
-//            cout << prevData[right].getMsgLeft(k) << " (MsgRight))" << endl;
+            cout << " (Calculation: ";
+            cout << dataCost(x, y, k) << "(data cost) + ";
+            cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
+            cout << prevData[bot].getMsgTop(k) << " (MsgBot) + ";
+            cout << prevData[left].getMsgRight(k) << " (MsgLeft) + ";
+            cout << prevData[right].getMsgLeft(k) << " (MsgRight))" << endl;
         }// End of if statement
     }//End of for loop
     if (x == 36 && y == 89) {
@@ -413,10 +456,23 @@ void updateBelief(int x, int y) {
     }
 }
 
+//********************************************************************
+//Method:	loopyBP
+//Description:	this function updates the data at every node for a fixed number 
+//              of iterations
+//Parameters:  	none
+//Returns:     	nothing 
+//Calls:        updateMessage
+//              updateBelief
+//Globals:	leftImageWidth
+//              MAX_OFF_SET
+//              prevData
+//              currData
+//              tempData
 void loopyBP() {
     cout << "RUNNING Loopy Belief Propagation..." << endl;
 
-    int iterations = 0;
+    int iterations = 1;
 
     currData = new node[leftSize];
     prevData = new node[leftSize];
@@ -427,7 +483,7 @@ void loopyBP() {
     cout << endl;
     cout << "Total iterations : " << iterations << endl;
 
-    for (int i = 0; i <= iterations; i++) {
+    for (int i = 0; i < iterations; i++) {
         //need to loop through x and y values 
         cout << endl;
         cout << "Updating data for iteration " << i << "... " << endl;
@@ -452,10 +508,17 @@ void loopyBP() {
     cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
 }// End of loopyBP function
 
+//********************************************************************
+//Method:	getK
+//Description:	this function gets the offset with the lowest associated cost
+//Parameters:  	pixel - the current pixel in the picture
+//Returns:     	k - the index of the offset 
+//Calls:        none
+//Globals:	currData
 int getK(int pixel) {
-    if (pixel == getIndex(36,89, leftImageWidth)){
-        cout << "getting k..." << endl;
-    }//End of if statement debugging    
+    //if (pixel == getIndex(36,89, leftImageWidth)){
+        //cout << "getting k..." << endl;
+    //}//End of if statement debugging    
     int belief = numeric_limits<int>::max();
     int currentBelief;
     int k;
@@ -465,8 +528,8 @@ int getK(int pixel) {
             k = kIndex;
             belief = currentBelief;
             //if (pixel == getIndex(36,89, leftImageWidth)){
-            cout << "K = " << k << endl;
-            cout << "belief = " << belief << endl;                
+            //cout << "K = " << k << endl;
+            //cout << "belief = " << belief << endl;                
             //}//End of if statement debugging              
         }//End of if statement
     }//End of k for loop
@@ -478,13 +541,13 @@ void calculateOutputPixels() {
     finalImageArray = new int [leftSize];
     int outputPixel;
     int k;
-    for (int x = 0; x <= leftImageWidth; x++) {
-        for (int y = 0; y <= leftImageHeight; y++) {
+    for (int x = 0; x < leftImageWidth; x++) {
+        for (int y = 0; y < leftImageHeight; y++) {
             int pixel = getIndex(x, y, leftImageWidth);
-            cout << "pixel("<<x<<","<<y<<")"<<endl;
+            //cout << "Pixel("<<x<<","<<y<<")"<<endl;
             k = getK(pixel);
             outputPixel = (255 * k) / MAX_OFF_SET;
-            cout<< "Output = " << outputPixel << endl;         
+            //cout<< "Output = " << outputPixel << endl;         
             finalImageArray[pixel] = outputPixel;
         }//End of y for loop
     }//End of x for loop
@@ -531,7 +594,9 @@ int main() {
     setFiles();
     loopyBP();
     calculateOutputPixels();
+    cout << "FinalImageArray: " << endl;
+    //wait_on_enter();
     //printArray(finalImageArray, leftSize);
-    //writeFinalDepthMapImage();
+    writeFinalDepthMapImage();
     return 0;
 }
