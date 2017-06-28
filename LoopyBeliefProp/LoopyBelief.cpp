@@ -416,7 +416,7 @@ void updateBelief(int x, int y) {
 void loopyBP() {
     cout << "RUNNING Loopy Belief Propagation..." << endl;
 
-    int iterations = 5;
+    int iterations = 0;
 
     currData = new node[leftSize];
     prevData = new node[leftSize];
@@ -449,18 +449,25 @@ void loopyBP() {
     cout << endl;
     cout << "All iterations are COMPLETE." << endl;
     cout << endl;
-    cout << "Loopy Belief Propagation COMPLETE." << endl;
+    cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
 }// End of loopyBP function
 
 int getK(int pixel) {
+    if (pixel == getIndex(36,89, leftImageWidth)){
+        cout << "getting k..." << endl;
+    }//End of if statement debugging    
     int belief = numeric_limits<int>::max();
     int currentBelief;
     int k;
-    for (int kIndex = 0; kIndex < MAX_OFF_SET; kIndex++) {
+    for (int kIndex = 0; kIndex <= MAX_OFF_SET; kIndex++) {
         currentBelief = currData[pixel].getBelief(kIndex);
         if (currentBelief < belief) {
             k = kIndex;
             belief = currentBelief;
+            //if (pixel == getIndex(36,89, leftImageWidth)){
+            cout << "K = " << k << endl;
+            cout << "belief = " << belief << endl;                
+            //}//End of if statement debugging              
         }//End of if statement
     }//End of k for loop
     return k;
@@ -474,12 +481,14 @@ void calculateOutputPixels() {
     for (int x = 0; x <= leftImageWidth; x++) {
         for (int y = 0; y <= leftImageHeight; y++) {
             int pixel = getIndex(x, y, leftImageWidth);
+            cout << "pixel("<<x<<","<<y<<")"<<endl;
             k = getK(pixel);
             outputPixel = (255 * k) / MAX_OFF_SET;
+            cout<< "Output = " << outputPixel << endl;         
             finalImageArray[pixel] = outputPixel;
         }//End of y for loop
     }//End of x for loop
-    cout << " Calculating output pixels COMPLETE " << endl;
+    cout << "Calculating output pixels COMPLETE " << endl;
 }// end of calculateOutputPixels
 
 void writeFinalDepthMapImage() {
@@ -522,6 +531,7 @@ int main() {
     setFiles();
     loopyBP();
     calculateOutputPixels();
-    writeFinalDepthMapImage();
+    //printArray(finalImageArray, leftSize);
+    //writeFinalDepthMapImage();
     return 0;
 }
