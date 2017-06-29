@@ -5,7 +5,7 @@ class node {
 public: 
     //Constructors
     node();
-    node(int grayScaleValue); 
+    //node(int grayScaleValue); 
     //Getters
     int getGrayScaleValue (){return grayScaleValue;}  
     float getBelief(int k);
@@ -14,17 +14,17 @@ public:
     float getMsgLeft(int k);
     float getMsgRight(int k);
     //Setters
-    void setBelief(int k, float belief);
-    void setMsgTop(int k, float msg);
-    void setMsgBottom(int k, float msg);
-    void setMsgLeft(int k, float msg);
-    void setMsgRight(int k, float msg);    
+    void setBelief(int k, int belief);
+    void setMsgTop(int k, int msg);
+    void setMsgBottom(int k, int msg);
+    void setMsgLeft(int k, int msg);
+    void setMsgRight(int k, int msg);    
 private:
     int grayScaleValue;
-    std::vector<float> beliefs;
-    std::vector<float> msgTop;
-    std::vector<float> msgBottom;
-    std::vector<float> msgRight;
-    std::vector<float> msgLeft;
+    std::vector<int> beliefs;
+    std::vector<int> msgTop;
+    std::vector<int> msgBottom;
+    std::vector<int> msgRight;
+    std::vector<int> msgLeft;
 };
 #endif
