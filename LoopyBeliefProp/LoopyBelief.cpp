@@ -24,14 +24,9 @@ const int LAMDA = 20;
 const int TRUNCATE = 2;
 //
 int numOfFiles = 1;
-//widths
-int leftImageWidth;
-int rigthImageWidth;
-//heights
-int leftImageHeight;
-//sizes
-int leftSize; //does this need to be a global?
-int rightSize; //does this need to be a global?
+int imageWidth;
+int imageHeight;
+int imageSize; 
 //image arrays
 int* leftImageArray;
 int* rightImageArray;
@@ -40,6 +35,10 @@ int* finalImageArray;
 node* tempData;
 node* prevData;
 node* currData;
+//loop belief arrays
+int* msg;
+int* belief;
+int* dC;
 
 using namespace std;
 
@@ -96,13 +95,12 @@ int getIndex(int x, int y, int imageWidth) {
 //Globals:	WINDOW_SIZE
 //              imageWidthLeft
 //              imageWidthRight
-
 int dataCost(int x, int y, int kPrime) {
     int sumOfAbsDiff = 0;
     int border = WINDOW_SIZE / 2;
     for (int i = x - border; i <= x + border; i++) {
         for (int j = y - border; j <= y + border; j++) {
-            sumOfAbsDiff += abs(leftImageArray[getIndex(i, j, leftImageWidth)] - rightImageArray[getIndex(i - kPrime, j, rigthImageWidth)]);
+            sumOfAbsDiff += abs(leftImageArray[getIndex(i, j, imageWidth)] - rightImageArray[getIndex(i - kPrime, j, imageWidth)]);
         }//inner for loop
     }//outer for loop
     return sumOfAbsDiff;
@@ -140,18 +138,10 @@ int getSize(ifstream& fileObj) {
     getline(fileObj, input);
     getline(fileObj, input);
     getline(fileObj, input);
-    int imageHeight;
-    int imageWidth;
     stringstream nums(input);
     nums >> imageWidth >> imageHeight;
     size = imageWidth * imageHeight;
     getline(fileObj, input); // this is the maximum gray scale value
-    if (numOfFiles == 0) {
-        leftImageHeight = imageHeight;
-        leftImageWidth = imageWidth;
-    } else {
-        rigthImageWidth = imageWidth;
-    }
     return size;
 }
 
@@ -200,14 +190,14 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
 void createPGMImageArray(ifstream& PGM_File, string fileName) {
     cout << "Creating image array of " << fileName << "..." << endl;
     if (numOfFiles == 1) {
-        leftSize = getSize(PGM_File);
-        leftImageArray = new int[leftSize];
-        putValuesIntoArray(leftImageArray, PGM_File, leftSize);
+        imageSize = getSize(PGM_File);
+        leftImageArray = new int[imageSize];
+        putValuesIntoArray(leftImageArray, PGM_File, imageSize);
         cout << "Left image array CREATED\n" << endl;
     } else {
-        rightSize = getSize(PGM_File);
-        rightImageArray = new int[rightSize];
-        putValuesIntoArray(rightImageArray, PGM_File, rightSize);
+        getSize(PGM_File);
+        rightImageArray = new int[imageSize];
+        putValuesIntoArray(rightImageArray, PGM_File, imageSize);
         cout << "Right image array CREATED\n" << endl;
     }//End of else
     numOfFiles--;
@@ -265,11 +255,11 @@ void setFiles() {
 
  void updateMessage(int x, int y) {
     double minVal;
-    int currentPixel = getIndex(x, y, leftImageWidth);
-    int top = getIndex(x, y - 1, leftImageWidth);
-    int bot = getIndex(x, y + 1, leftImageWidth);
-    int left = getIndex(x - 1, y, leftImageWidth);
-    int right = getIndex(x + 1, y, leftImageWidth);
+    int currentPixel = getIndex(x, y, imageWidth);
+    int top = getIndex(x, y - 1, imageWidth);
+    int bot = getIndex(x, y + 1, imageWidth);
+    int left = getIndex(x - 1, y, imageWidth);
+    int right = getIndex(x + 1, y, imageWidth);
     //used used for debugging
     int tempKPrime;
     int tempDataCost;
@@ -294,18 +284,16 @@ void setFiles() {
 
             if (tempMsg < minVal) {
                 minVal = tempMsg;
-                tempKPrime = kPrime; // used for debugging
                 tempDataCost = dataCost(x, y, kPrime); // used for debugging
             }//End of if statement
 
         }//End of inner loop
 
-        currData[getIndex(x, y, leftImageWidth)].setMsgTop(k, minVal);
+        currData[getIndex(x, y, imageWidth)].setMsgTop(k, minVal);
 
         if (x == 36 && y == 89) {
-            cout << "MsgTop[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgTop(k);
+            cout << "MsgTop[" << k << "] = " << currData[getIndex(x, y, imageWidth)].getMsgTop(k);
             cout << " [Calculation : ";
-            //cout << dataCost(x, y, tempKPrime) << " + ";
             cout << tempDataCost << " (dataCost)" << " + ";
             cout << smoothnessCost(k, tempKPrime) << " (smoothnessCost): {k = " << k << " & " << "kPrime = " << tempKPrime  << "} + ";
             cout << prevData[bot].getMsgTop(tempKPrime) << " (MsgBot)" << " + ";
@@ -339,7 +327,7 @@ void setFiles() {
 
         }//End of inner loop
 
-        currData[getIndex(x, y, leftImageWidth)].setMsgBottom(k, minVal);
+        currData[getIndex(x, y, imageWidth)].setMsgBottom(k, minVal);
 
 //        if (x == 36 && y == 89) {
 //            cout << "MsgBottom[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgBottom(k) << endl;
@@ -377,7 +365,7 @@ void setFiles() {
             }//End of if statement 
 
         }//End of inner loop
-        currData[getIndex(x, y, leftImageWidth)].setMsgLeft(k, minVal);
+        currData[getIndex(x, y, imageWidth)].setMsgLeft(k, minVal);
 //        if (x == 36 && y == 89) {
 //            cout << "MsgLeft[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgLeft(k) << endl;
 //            //            cout << " [Calculation : ";
@@ -413,7 +401,7 @@ void setFiles() {
             }//End of if statement  
 
         }//End of inner loop
-        currData[getIndex(x, y, leftImageWidth)].setMsgRight(k, minVal);
+        currData[getIndex(x, y, imageWidth)].setMsgRight(k, minVal);
 
 //        if (x == 36 && y == 89) {
 //            cout << "MsgRight[" << k << "] = " << currData[getIndex(x, y, leftImageWidth)].getMsgRight(k) << endl;
@@ -449,19 +437,19 @@ void setFiles() {
 void updateBelief(int x, int y) {
     int belief;
 
-    int top = getIndex(x, y - 1, leftImageWidth);
-    int bot = getIndex(x, y + 1, leftImageWidth);
-    int left = getIndex(x - 1, y, leftImageWidth);
-    int right = getIndex(x + 1, y, leftImageWidth);
+    int top = getIndex(x, y - 1, imageWidth);
+    int bot = getIndex(x, y + 1, imageWidth);
+    int left = getIndex(x - 1, y, imageWidth);
+    int right = getIndex(x + 1, y, imageWidth);
 
     for (int k = 0; k <= MAX_OFF_SET; k++) {
         belief = dataCost(x, y, k) + prevData[top].getMsgBottom(k) +
                 prevData[bot].getMsgTop(k) +
                 prevData[left].getMsgRight(k) + prevData[right].getMsgLeft(k);
-        currData[getIndex(x, y, leftImageWidth)].setBelief(k, belief);
+        currData[getIndex(x, y, imageWidth)].setBelief(k, belief);
         if (x == 36 && y == 89) {
             cout << "Belief[" << k << "] = ";
-            cout << currData[getIndex(x, y, leftImageWidth)].getBelief(k);
+            cout << currData[getIndex(x, y, imageWidth)].getBelief(k);
                         cout << " (Calculation: ";
                         cout << dataCost(x, y, k) << "(data cost) + ";
                         cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
@@ -483,7 +471,7 @@ void updateBelief(int x, int y) {
 //              of iterations
 //Parameters:  	none
 //Returns:     	nothing 
-//Calls:        updateMessage
+//Calls:        updateMessage 
 //              updateBelief
 //Globals:	leftImageWidth
 //              MAX_OFF_SET
@@ -494,11 +482,10 @@ void updateBelief(int x, int y) {
 void loopyBP() {
     cout << "RUNNING Loopy Belief Propagation..." << endl;
 
-    int iterations = 8;
-
-    currData = new node[leftSize];
-    prevData = new node[leftSize];
-    tempData = new node[leftSize];
+    int iterations = 0;
+    currData = new node[imageSize];
+    prevData = new node[imageSize];
+    tempData = new node[imageSize];
 
     int border = (WINDOW_SIZE / 2) + MAX_OFF_SET;
 
@@ -514,8 +501,9 @@ void loopyBP() {
         tempData = prevData;
         prevData = currData;
         currData = tempData;
-        for (int x = border; x <= leftImageWidth - border; x++) {
-            for (int y = border; y <= leftImageHeight - border; y++) {
+        //for each pixel x,y
+        for (int x = border; x <= imageWidth - border; x++) {
+            for (int y = border; y <= imageHeight - border; y++) {
                 //update data
                 updateMessage(x, y);
                 updateBelief(x, y);
@@ -561,12 +549,12 @@ int getK(int pixel) {
 
 void calculateOutputPixels() {
     cout << "Calculating output pixels..." << endl;
-    finalImageArray = new int [leftSize];
+    finalImageArray = new int [imageSize];
     int outputPixel;
     int k;
-    for (int x = 0; x < leftImageWidth; x++) {
-        for (int y = 0; y < leftImageHeight; y++) {
-            int pixel = getIndex(x, y, leftImageWidth);
+    for (int x = 0; x < imageWidth; x++) {
+        for (int y = 0; y < imageHeight; y++) {
+            int pixel = getIndex(x, y, imageWidth);
             //cout << "Pixel("<<x<<","<<y<<")"<<endl;
             k = getK(pixel);
             outputPixel = (255 * k) / MAX_OFF_SET;
@@ -585,14 +573,14 @@ void writeFinalDepthMapImage() {
     if (outFile.is_open()) {
         outFile << "P2" << endl;
         outFile << "# output from LoopBelief Program" << endl;
-        outFile << leftImageWidth << " " << leftImageHeight << endl;
+        outFile << imageWidth << " " << imageHeight << endl;
         outFile << "255" << endl;
         int i = 0;
-        while (i < leftSize) {
+        while (i < imageSize) {
             for (int j = 0; j < 17; j++) {
                 outFile << (int) finalImageArray[i] << " ";
                 i++;
-                if (i >= leftSize) break;
+                if (i >= imageSize) break;
             }//End of for loop
             outFile << "\r\n";
         }//End of while loop
@@ -617,9 +605,9 @@ void verifyPGMArray() {
     bool firstNum = false;
     bool lastNum = false;
     firstNum = leftImageArray[0] == 2;
-    lastNum = leftImageArray[leftSize - 1] == 22;
-    cout << "Size = " << leftSize << endl;
-    cout << "the index of the last element (384, 288) = " << leftImageArray[getIndex(384, 288, leftImageWidth)] << endl;
+    lastNum = leftImageArray[imageSize - 1] == 22;
+    cout << "Size = " << imageSize << endl;
+    cout << "the index of the last element (384, 288) = " << leftImageArray[getIndex(384, 288, imageWidth)] << endl;
     if (firstNum == true)
         cout << "The FIRST value of the PGM file is 2 " << endl;
     else
@@ -629,13 +617,13 @@ void verifyPGMArray() {
         cout << "The LAST value of the PGM file is 22 " << endl;
     else {
         cout << "The LAST value of the PGM file is NOT 22 " << endl;
-        cout << "LAST value = " << leftImageArray[leftSize - 1];
+        cout << "LAST value = " << leftImageArray[imageSize - 1];
     }
 }
 
 void getPixelValue(int x , int y) {
     //Pixel needed form both images is (36,89)
-    int pixel = getIndex(x, y, leftImageWidth);
+    int pixel = getIndex(x, y, imageWidth);
     int value = 0;
     cout << endl;
      cout << "Pixel ("<<x <<", "<<y<< ") [1-D index = " << pixel << "]" << endl; 
@@ -651,7 +639,7 @@ void getPixelValue(int x , int y) {
 void troubleShootDataCost(int x, int y, int kPrime) {
     int sumOfAbsDiff = 0;
     int border = WINDOW_SIZE / 2;
-    int currentPixel = getIndex(x, y, leftImageWidth);
+    int currentPixel = getIndex(x, y, imageWidth);
     cout << "This is a Trouble Shoot for Data Cost... " << endl;
     cout << "kPrime = " << kPrime << endl;
     cout << "Pixel (36, 89)"<< endl;
@@ -665,9 +653,9 @@ void troubleShootDataCost(int x, int y, int kPrime) {
 //            cout << "(" << i - kPrime << ", " << j << ")" << endl;
             int valueLeft = 0;
             int valueRight = 0;
-            valueLeft = leftImageArray[getIndex(i, j, leftImageWidth)];
-            valueRight = rightImageArray[getIndex(i - kPrime, j, rigthImageWidth)];
-            int absDiff = abs(leftImageArray[getIndex(i, j, leftImageWidth)] - rightImageArray[getIndex(i - kPrime, j, rigthImageWidth)]);
+            valueLeft = leftImageArray[getIndex(i, j, imageWidth)];
+            valueRight = rightImageArray[getIndex(i - kPrime, j, imageWidth)];
+            int absDiff = abs(leftImageArray[getIndex(i, j, imageWidth)] - rightImageArray[getIndex(i - kPrime, j, imageWidth)]);
             sumOfAbsDiff += absDiff;
             cout << "|" << valueLeft << " (LeftArray["<<x <<", "<<y<<"]) - " << valueRight << " (RightArray["<<x <<" - " << kPrime<<", "<<y<<"])|  = " << absDiff << endl;
             cout << endl;
