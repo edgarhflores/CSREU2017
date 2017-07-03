@@ -478,45 +478,88 @@ void updateBelief(int x, int y) {
 //              prevData
 //              currData
 //              tempData
+//void loopyBP() {
+//    cout << "RUNNING Loopy Belief Propagation..." << endl;
+//
+//    int iterations = 0;
+//    currData = new node[imageSize];
+//    prevData = new node[imageSize];
+//    tempData = new node[imageSize];
+//
+//    int border = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+//
+//    cout << endl;
+//    cout << "Total iterations : " << iterations << endl;
+//
+//    for (int i = 0; i <= iterations; i++) {
+//        //need to loop through x and y values 
+//        cout << endl;
+//        cout << "Updating data for iteration " << i << "... " << endl;
+//        cout << endl;
+//        //swap pointers
+//        tempData = prevData;
+//        prevData = currData;
+//        currData = tempData;
+//        //for each pixel x,y
+//        for (int x = border; x <= imageWidth - border; x++) {
+//            for (int y = border; y <= imageHeight - border; y++) {
+//                //update data
+//                updateMessage(x, y);
+//                updateBelief(x, y);
+//            }// End of for loop for y
+//        }// End of for loop for x
+//        cout << "Iteration " << i << " COMPLETE" << endl;
+//    }//End of for loop for iterations
+//
+//    cout << endl;
+//    cout << "All iterations are COMPLETE." << endl;
+//    cout << endl;
+//    cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
+//}// End of loopyBP function
 
-void loopyBP() {
-    cout << "RUNNING Loopy Belief Propagation..." << endl;
+enum direction_t {NORTH = 0, SOUTH = 1, EAST = 2, WEST = 3};
 
-    int iterations = 0;
-    currData = new node[imageSize];
-    prevData = new node[imageSize];
-    tempData = new node[imageSize];
+//********************************************************************
+//Method:	setMsg
+//Description:	this function sets a value in a specific position in an
+//              array
+//Parameters:  	array - the array that will be updated
+//              enum - the direction of a message
+//              k - the current k
+//              x - the current x
+//              y - the current y
+//              value - the value that will be set in a position
+//Returns:     	nothing 
+//Calls:        nothing
+//Globals:	nothing
+//void setMsg (int *array, direction_t, int k, int x, int y , int value){
+//    int position = getIndex(x, y, imageWidth); 
+//    array [direction_t][k][position] = value;
+//}
 
-    int border = (WINDOW_SIZE / 2) + MAX_OFF_SET;
 
-    cout << endl;
-    cout << "Total iterations : " << iterations << endl;
-
-    for (int i = 0; i <= iterations; i++) {
-        //need to loop through x and y values 
-        cout << endl;
-        cout << "Updating data for iteration " << i << "... " << endl;
-        cout << endl;
-        //swap pointers
-        tempData = prevData;
-        prevData = currData;
-        currData = tempData;
-        //for each pixel x,y
-        for (int x = border; x <= imageWidth - border; x++) {
-            for (int y = border; y <= imageHeight - border; y++) {
-                //update data
-                updateMessage(x, y);
-                updateBelief(x, y);
-            }// End of for loop for y
-        }// End of for loop for x
-        cout << "Iteration " << i << " COMPLETE" << endl;
-    }//End of for loop for iterations
-
-    cout << endl;
-    cout << "All iterations are COMPLETE." << endl;
-    cout << endl;
-    cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
-}// End of loopyBP function
+//********************************************************************
+//Method:	loopyBP
+//Description:	this function updates the data at every node for a fixed number 
+//              of iterations
+//Parameters:  	none
+//Returns:     	nothing 
+//Calls:        updateMessage 
+//              updateBelief
+//Globals:	leftImageWidth
+//              MAX_OFF_SET
+//              prevData
+//              currData
+//              tempData
+void loopyBP(){
+    int k = 0;
+    int x = 36;
+    int y = 89;
+    int value = 100;
+    int size = imageHe
+    msg = new int[4][MAX_OFF_SET][imageSize];
+    //setMsg(Msg, NORTH, k, x, y , value);
+}//End of loopyBP
 
 //********************************************************************
 //Method:	getK
@@ -669,13 +712,14 @@ int main() {
     cout << "Loopy Belief Propagation: Edgar Flores\n" << endl;
     setFiles();
     loopyBP();
+    //calculateOutputPixels();
+    //writeFinalDepthMapImage();
+    return 0;
+}
+//Trouble shooting functions:
     //getPixelValue(36,89);
     //troubleShootDataCost(36, 89, 0);
     //verifyPGMArray();
-    calculateOutputPixels();
     //cout << "FinalImageArray: " << endl;
     //wait_on_enter();
     //printArray(leftImageArray, leftSize - 1);
-    writeFinalDepthMapImage();
-    return 0;
-}
