@@ -59,7 +59,6 @@ using namespace std;
 //Calls:       	nothing
 //Globals:	LAMDA
 //              TRUNCATE
-
 int smoothnessCost(int k, int kPrime) {
     int n = abs(k - kPrime);
     int smoothnessCost;
@@ -287,7 +286,7 @@ void updateMessage(int x, int y) {
 
         for (int kPrime = 0; kPrime <= MAX_OFF_SET; kPrime++) {
 
-            int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k, kPrime) +
+            int tempMsg = dataCost(x, y, kPrime) + smoothnessCost(k kPrime, kPrime) +
                     prevData[bot].getMsgTop(kPrime) +
                     prevData[left].getMsgRight(kPrime) +
                     prevData[right].getMsgLeft(kPrime);
