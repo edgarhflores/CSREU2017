@@ -1,0 +1,39 @@
+int getK(int x, int y) {
+    int pixel = getIndex(x, y, imageWidth);
+    int belief = numeric_limits<int>::max();
+    int currentBelief;
+    int k = 0;
+    for (int kIndex = 0; kIndex <= MAX_OFF_SET; kIndex++) {
+        currentBelief = currData[pixel].getBelief(kIndex);
+        if (currentBelief < belief) {
+            k = kIndex;
+            belief = currentBelief;
+        }//End of if statement
+    }//End of k for loop
+    return k;
+}//End of calculateBeliefs
+
+void calculateEnergy() {
+    cout << "Calculating energy for all pixels..." << endl;
+    int borderN = WINDOW_SIZE / 2;
+    int borderS = imageHeight - (WINDOW_SIZE / 2);
+    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+    int borderW = imageWidth - (WINDOW_SIZE / 2);
+    int energy = 0;
+    int k = 0;
+    for (int x = borderE; x <= borderW; x++) {
+        for (int y = borderN; y <= borderS; y++) {
+            k = getK(x, y);
+            int kPrimeN = getK(x, y - 1);
+            int kPrimeS = getK(x, y + 1);
+            int kPrimeE = getK(x - 1, y);
+            int kPrimeW = getK(x + 1, y);
+            int smcostOfNeighbors = smoothnessCost(k, kPrimeN) + smoothnessCost(k, kPrimeS) + smoothnessCost(k, kPrimeE) + smoothnessCost(k, kPrimeW);
+            //cout << "smcostOfNeighbors = " << smcostOfNeighbors << endl;
+            energy += dataCost(x, y, k) + smcostOfNeighbors;
+        }//End of y for loop
+    }//End of x for loop
+    cout << "Calculating energy pixels COMPLETE " << endl;
+    cout << "Energy = " << energy << endl;
+    cout << endl;
+}// end of calculateEnergy
