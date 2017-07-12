@@ -17,6 +17,7 @@
 #include <vector>
 #include <limits>
 #include "node.h"
+//#include "MercatorScrathSheet.cpp"
 //constants
 const int WINDOW_SIZE = 5;
 const int MAX_OFF_SET = 15;
@@ -36,9 +37,7 @@ node* tempData;
 node* prevData;
 node* currData;
 //loop belief arrays
-int* msg;
-int* belief;
-int* dC;
+
 
 using namespace std;
 
@@ -55,9 +54,7 @@ using namespace std;
 
 int smoothnessCost(int k, int kPrime) {
     int n = abs(k - kPrime);
-    int smoothnessCost;
-    smoothnessCost = LAMDA * min(n, TRUNCATE);
-    return smoothnessCost;
+    return n < TRUNCATE ? n * LAMDA : LAMDA * TRUNCATE;
 }
 
 //********************************************************************
@@ -72,8 +69,7 @@ int smoothnessCost(int k, int kPrime) {
 //Globals:	none
 
 int getIndex(int x, int y, int imageWidth) {
-    int index;
-    return index = (imageWidth * y) + x;
+    return (imageWidth * y) +x;
 }
 
 //********************************************************************
@@ -152,6 +148,7 @@ void putValuesIntoArray(int *array, ifstream& fileObj, int size) {
 //              fileName - the name of the PGM file
 //Returns:     	nothing 
 //Calls:       	putValuesIntoArray
+//              getSize
 //Globals:	left size
 //              leftImageArray
 //              rightImageArray
@@ -389,48 +386,12 @@ void updateMessage(int x, int y) {
 }// End of updateMessage
 
 //********************************************************************
-//Method:	updateBelief
-//Description:	this function updates the belief of each of set for every node.
-//Parameters:  	x - the x coordinate of a pixel
-//              y - the y coordinate of a pixel
-//Returns:     	nothing 
-//Calls:        getIndex
-//              dataCost
-//Globals:	leftImageWidth
-//              MAX_OFF_SET
-//              prevData
-//              currData
-
-void updateBelief(int x, int y) {
-    int belief;
-
-    int top = getIndex(x, y - 1, imageWidth);
-    int bot = getIndex(x, y + 1, imageWidth);
-    int left = getIndex(x - 1, y, imageWidth);
-    int right = getIndex(x + 1, y, imageWidth);
-
-    for (int k = 0; k <= MAX_OFF_SET; k++) {
-        belief = dataCost(x, y, k) + prevData[top].getMsgBottom(k) +
-                prevData[bot].getMsgTop(k) +
-                prevData[left].getMsgRight(k) + prevData[right].getMsgLeft(k);
-        currData[getIndex(x, y, imageWidth)].setBelief(k, belief);
-        //        if (x == 36 && y == 89) {
-        //            cout << "Belief[" << k << "] = ";
-        //            cout << currData[getIndex(x, y, imageWidth)].getBelief(k);
-        //                        cout << " (Calculation: ";
-        //                        cout << dataCost(x, y, k) << "(data cost) + ";
-        //                        cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
-        //                        cout << prevData[bot].getMsgTop(k) << " (MsgBot) + ";
-        //                        cout << prevData[left].getMsgRight(k) << " (MsgLeft) + ";
-        //                        cout << prevData[right].getMsgLeft(k) << " (MsgRight))" << endl;
-        //        }// End of if statement
-    }//End of for loop
-    //    if (x == 36 && y == 89) {
-    //        cout << endl;
-    //        cout << "Waiting on other pixels for current iteration..." << endl;
-    //        cout << endl;
-    //    }
-}
+//Method:	getK
+//Description:	this function gets the offset with the lowest associated cost
+//Parameters:  	pixel - the current pixel in the picture
+//Returns:     	k - the index of the offset 
+//Calls:        none
+//Globals:	currData
 
 int getK(int x, int y) {
     int pixel = getIndex(x, y, imageWidth);
@@ -472,63 +433,7 @@ void calculateEnergy() {
     cout << endl;
 }// end of calculateEnergy
 
-//********************************************************************
-//Method:	loopyBP
-//Description:	this function updates the data at every node for a fixed number 
-//              of iterations
-//Parameters:  	none
-//Returns:     	nothing 
-//Calls:        updateMessage 
-//              updateBelief
-//Globals:	leftImageWidth
-//              MAX_OFF_SET
-//              prevData
-//              currData
-//              tempData
-
-void loopyBP() {
-    cout << "RUNNING Loopy Belief Propagation..." << endl;
-    int iterations = 9;
-    int borderN = WINDOW_SIZE / 2;
-    int borderS = imageHeight - (WINDOW_SIZE / 2);
-    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
-    int borderW = imageWidth - (WINDOW_SIZE / 2);
-    currData = new node[imageSize];
-    prevData = new node[imageSize];
-    tempData = new node[imageSize];
-
-
-    cout << endl;
-    cout << "Total iterations : " << iterations << endl;
-
-    for (int i = 0; i < iterations; i++) {
-        //need to loop through x and y values 
-        cout << endl;
-        cout << "Updating data for iteration " << i + 1 << "... " << endl;
-        cout << endl;
-        //swap pointers
-        tempData = prevData;
-        prevData = currData;
-        currData = tempData;
-        //for each pixel x,y
-        for (int x = borderE; x < borderW; x++) {
-            for (int y = borderN; y < borderS; y++) {
-                //update data
-                updateMessage(x, y);
-                updateBelief(x, y);
-            }// End of for loop for y
-        }// End of for loop for x
-        cout << "Iteration " << i << " COMPLETE" << endl;
-        calculateEnergy();
-    }//End of for loop for iterations
-
-    cout << endl;
-    cout << "All iterations are COMPLETE." << endl;
-    cout << endl;
-    cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
-}// End of loopyBP function
-
-enum direction_t {
+enum direction {
     NORTH = 0, SOUTH = 1, EAST = 2, WEST = 3
 };
 
@@ -545,11 +450,113 @@ enum direction_t {
 //Returns:     	nothing 
 //Calls:        nothing
 //Globals:	nothing
-//void setMsg (int *array, direction_t, int k, int x, int y , int value){
-//    int position = getIndex(x, y, imageWidth); 
-//    array [direction_t][k][position] = value;
-//}
 
+void setMsg(int **array, direction d, int k, int x, int y, int value) {
+    int position = (d * MAX_OFF_SET * imageSize)+(k * imageSize) +(imageWidth * y + x);
+    (*array)[position] = value;
+}
+
+//********************************************************************
+//Method:	getMsg
+//Description:	this function sets a value in a specific position in an
+//              array
+//Parameters:  	array - the array that will be updated
+//              enum - the direction of a message
+//              k - the current k
+//              x - the current x
+//              y - the current y
+//              value - the value that will be set in a position
+//Returns:     	nothing 
+//Calls:        nothing
+//Globals:	nothing
+
+int getMsg(int **array, direction d, int k, int x, int y) {
+    int position = (d * MAX_OFF_SET * imageSize)+(k * imageSize) +(imageWidth * y + x);
+    return (*array)[position];
+}
+void setDC (int x, int y, int k, int sum, int **dc){
+    int position = (MAX_OFF_SET * k)+(imageWidth * y + x);
+    (*dc)[position] = sum;
+}
+int getDC (int x, int y, int k, int **dc){
+    int position = (MAX_OFF_SET * k)+(imageWidth * y + x);
+    return (*dc)[position];
+}
+void setBelief (int x, int y, int k, int sum, int *blf){
+    int position = (MAX_OFF_SET * k)+(imageWidth * y + x);
+    blf[position] = sum;
+}
+int getBelief (int x, int y, int k, int **blf){
+    int position = (MAX_OFF_SET * k)+(imageWidth * y + x);
+    return (*blf)[position];
+}
+
+void memoizieDataCost(int** dc) {
+    int borderN = WINDOW_SIZE / 2;
+    int borderS = imageHeight - (WINDOW_SIZE / 2);
+    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+    int borderW = imageWidth - (WINDOW_SIZE / 2);
+        for (int x = borderE; x < borderW; x++) {
+            for (int y = borderN; y < borderS; y++) {
+            for (int k = 0; k < MAX_OFF_SET; k++) {
+                int sum = 0;
+                int absDiff;
+                for (int i = x - WINDOW_SIZE / 2; i <= x + WINDOW_SIZE / 2; i++) {
+                    for (int j = y - WINDOW_SIZE / 2; j <= y + WINDOW_SIZE / 2; j++) {
+                        absDiff = abs((int) leftImageArray[j * imageWidth + i]
+                                - (int) rightImageArray[(j - k) * imageWidth + i]);
+                        sum += absDiff;
+                    }
+                }
+                setDC(x, y, k, sum, dc);
+            }
+        }
+    }
+}
+//********************************************************************
+//Method:	updateBelief
+//Description:	this function updates the belief of each of set for every node.
+//Parameters:  	x - the x coordinate of a pixel
+//              y - the y coordinate of a pixel
+//Returns:     	nothing 
+//Calls:        getIndex
+//              dataCost
+//Globals:	leftImageWidth
+//              MAX_OFF_SET
+//              prevData
+//              currData
+
+void updateBelief(int x, int y) {
+    int belief;
+
+    int top = getIndex(x, y - 1, imageWidth);
+    int bot = getIndex(x, y + 1, imageWidth);
+    int left = getIndex(x - 1, y, imageWidth);
+    int right = getIndex(x + 1, y, imageWidth);
+
+    for (int k = 0; k <= MAX_OFF_SET; k++) {
+        belief = dataCost(x, y, k) + prevData[top].getMsgBottom(k) +
+                prevData[bot].getMsgTop(k) +
+                prevData[left].getMsgRight(k) + prevData[right].getMsgLeft(k);
+        currData[getIndex(x, y, imageWidth)].setBelief(k, belief);
+        //setBelief(x,y,k,belief, &belief)
+        //        if (x == 36 && y == 89) {
+        //            cout << "Belief[" << k << "] = ";
+        //            cout << currData[getIndex(x, y, imageWidth)].getBelief(k);
+        //                        cout << " (Calculation: ";
+        //                        cout << dataCost(x, y, k) << "(data cost) + ";
+        //                        cout << prevData[top].getMsgBottom(k) << " (MsgTop) + ";
+        //                        cout << prevData[bot].getMsgTop(k) << " (MsgBot) + ";
+        //                        cout << prevData[left].getMsgRight(k) << " (MsgLeft) + ";
+        //                        cout << prevData[right].getMsgLeft(k) << " (MsgRight))" << endl;
+        //        }// End of if statement
+    }//End of for loop
+    //    if (x == 36 && y == 89) {
+    //        cout << endl;
+    //        cout << "Waiting on other pixels for current iteration..." << endl;
+    //        cout << endl;
+    //    }
+}
 
 //********************************************************************
 //Method:	loopyBP
@@ -564,23 +571,93 @@ enum direction_t {
 //              prevData
 //              currData
 //              tempData
-//void loopyBP(){
-//    int k = 0;
-//    int x = 36;
-//    int y = 89;
-//    int value = 100;
-//    //int size = imageHe
-//    //msg = new int[4][MAX_OFF_SET][imageSize];
-//    //setMsg(Msg, NORTH, k, x, y , value);
-//}//End of loopyBP
 
-//********************************************************************
-//Method:	getK
-//Description:	this function gets the offset with the lowest associated cost
-//Parameters:  	pixel - the current pixel in the picture
-//Returns:     	k - the index of the offset 
-//Calls:        none
-//Globals:	currData
+void loopyBP() {
+    cout << "RUNNING Loopy Belief Propagation..." << endl;
+    cout << endl;
+    int* currMsg;
+    int* prevMsg;
+    int* belief;
+    int* dc;
+    currMsg = new int[4 * MAX_OFF_SET * imageSize];
+    prevMsg = new int[4 * MAX_OFF_SET * imageSize];
+    belief = new int [MAX_OFF_SET * imageSize];
+    dc = new int [MAX_OFF_SET * imageSize];
+    int* bMinN = new int [MAX_OFF_SET];
+    int* bMinS = new int [MAX_OFF_SET];
+    int* bMinE = new int [MAX_OFF_SET];
+    int* bMinW = new int [MAX_OFF_SET];
+
+    int iterations = 1;
+
+    int borderN = WINDOW_SIZE / 2;
+    int borderS = imageHeight - (WINDOW_SIZE / 2);
+    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+    int borderW = imageWidth - (WINDOW_SIZE / 2);
+    cout << "memoizing datacost..." << endl;
+    memoizieDataCost(&dc);
+    cout << "Total iterations : " << iterations << endl;
+    cout << endl;
+    for (int i = 0; i < iterations; i++) {
+        cout << "Updating data for iteration " << i + 1 << "... " << endl;
+        cout << endl;
+        //for each pixel x,y
+        for (int x = borderE; x < borderW; x++) {
+            for (int y = borderN; y < borderS; y++) {
+                cout << "("<<x<<", "<<y<<")"<<endl;
+                for (int k = 0; k < MAX_OFF_SET; k++) {
+                    cout << "k = " << k << endl;
+                    bMinN[k] = numeric_limits<int>::max();
+                    bMinS[k] = numeric_limits<int>::max();
+                    bMinE[k] = numeric_limits<int>::max();
+                    bMinW[k]= numeric_limits<int>::max();
+                    for (int kPrime = 0; kPrime < MAX_OFF_SET; kPrime++) {
+                        cout << "kPrime = " << kPrime << endl;
+                        int dtcost = getDC(x,y,kPrime,&dc);
+                        int smcost = smoothnessCost(k,kPrime);
+                        int mN = getMsg(&prevMsg,SOUTH, kPrime, x, y);
+                        int mS = getMsg(&prevMsg,NORTH, kPrime, x, y);
+                        int mE = getMsg(&prevMsg,WEST, kPrime, x, y);
+                        int mW = getMsg(&prevMsg,EAST, kPrime, x, y);
+                        int mT = mN+mS+mE+mW;
+                        int base = dtcost + smcost + mT;
+                        cout << "base = " << base<< endl;
+                        int bN = base - mN;
+                        cout << "bN = " << bN << endl;
+                        int bS = base - bS;
+                        cout << "bS = " << bS << endl;
+                        int bE = base - bE;
+                        cout << "bE = " << bE << endl;
+                        int bW = base - bW;
+                        cout << "bW = " << bW << endl;
+                        bMinN[k] = min(bMinN[k], bN);
+                        bMinS[k] = min(bMinN[k], bS);
+                        bMinE[k] = min(bMinN[k], bE);
+                        bMinW[k] = min(bMinN[k], bW);                      
+                    }//end of kPrime
+                    //Must set all the messages an belief                 
+                    setMsg(&currMsg,NORTH, k, x, y, bMinN[k]);
+                    cout << "msgNorth["<<k<<"] = " << getMsg(&currMsg, NORTH, k, x, y) << endl;
+                    setMsg(&currMsg,SOUTH, k, x, y, bMinS[k]);
+                    cout << "msgSouth["<<k<<"] = " << getMsg(&currMsg, SOUTH, k, x, y) << endl;
+                    setMsg(&currMsg,EAST, k, x, y, bMinE[k]);
+                    cout << "msgEAST["<<k<<"] = " << getMsg(&currMsg, EAST, k, x, y) << endl;
+                    setMsg(&currMsg,WEST, k, x, y, bMinW[k]);
+                    cout << "msgWEST["<<k<<"] = " << getMsg(&currMsg, WEST, k, x, y) << endl;
+                    int dtcost = getDC(x,y,k,&dc);
+                    int belief = bMinE[k]+bMinN[k]+bMinS[k]+bMinW[k]+dtcost;
+                    setBelief(x,y,k,belief, &belief);
+                }//End of k
+            }// End of for loop for y
+        }// End of for loop for x
+        cout << "Iteration " << i << " COMPLETE" << endl;
+        calculateEnergy();
+    }//End of for loop for iterations
+    cout << endl;
+    cout << "All iterations are COMPLETE." << endl;
+    cout << endl;
+    cout << "Loopy Belief Propagation COMPLETE.\n" << endl;
+}// End of loopyBP function
 
 void calculateOutputPixels() {
     cout << "Calculating output pixels..." << endl;
@@ -637,9 +714,10 @@ void writeFinalDepthMapImage() {
 int main() {
     cout << "Loopy Belief Propagation: Edgar Flores\n" << endl;
     setFiles();
+    //cout << "index = " << getIndex(36,89,imageWidth)<< endl;
     loopyBP();
-    calculateOutputPixels();
-    writeFinalDepthMapImage();
+    //calculateOutputPixels();
+    //writeFinalDepthMapImage();
     return 0;
 }
 //Trouble shooting functions:
