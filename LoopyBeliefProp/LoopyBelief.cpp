@@ -384,55 +384,6 @@ void updateMessage(int x, int y) {
     }//End of outer loop
 
 }// End of updateMessage
-
-//********************************************************************
-//Method:	getK
-//Description:	this function gets the offset with the lowest associated cost
-//Parameters:  	pixel - the current pixel in the picture
-//Returns:     	k - the index of the offset 
-//Calls:        none
-//Globals:	currData
-
-int getK(int x, int y) {
-    int pixel = getIndex(x, y, imageWidth);
-    int belief = numeric_limits<int>::max();
-    int currentBelief;
-    int k = 0;
-    for (int kIndex = 0; kIndex <= MAX_OFF_SET; kIndex++) {
-        currentBelief = currData[pixel].getBelief(kIndex);
-        if (currentBelief < belief) {
-            k = kIndex;
-            belief = currentBelief;
-        }//End of if statement
-    }//End of k for loop
-    return k;
-}//End of calculateBeliefs
-
-void calculateEnergy() {
-    cout << "Calculating energy for all pixels..." << endl;
-    int borderN = WINDOW_SIZE / 2;
-    int borderS = imageHeight - (WINDOW_SIZE / 2);
-    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
-    int borderW = imageWidth - (WINDOW_SIZE / 2);
-    int energy = 0;
-    int k = 0;
-    for (int x = borderE; x <= borderW; x++) {
-        for (int y = borderN; y <= borderS; y++) {
-            k = getK(x, y);
-            int kPrimeN = getK(x, y - 1);
-            int kPrimeS = getK(x, y + 1);
-            int kPrimeE = getK(x - 1, y);
-            int kPrimeW = getK(x + 1, y);
-            int smcostOfNeighbors = smoothnessCost(k, kPrimeN) + smoothnessCost(k, kPrimeS) + smoothnessCost(k, kPrimeE) + smoothnessCost(k, kPrimeW);
-            //cout << "smcostOfNeighbors = " << smcostOfNeighbors << endl;
-            energy += dataCost(x, y, k) + smcostOfNeighbors;
-        }//End of y for loop
-    }//End of x for loop
-    cout << "Calculating energy pixels COMPLETE " << endl;
-    cout << "Energy = " << energy << endl;
-    cout << endl;
-}// end of calculateEnergy
-
 enum direction {
     NORTH = 0, SOUTH = 1, EAST = 2, WEST = 3
 };
@@ -490,6 +441,54 @@ int getBelief (int x, int y, int k, int **blf){
     int position = (MAX_OFF_SET * k)+(imageWidth * y + x);
     return (*blf)[position];
 }
+//********************************************************************
+//Method:	getK
+//Description:	this function gets the offset with the lowest associated cost
+//Parameters:  	pixel - the current pixel in the picture
+//Returns:     	k - the index of the offset 
+//Calls:        none
+//Globals:	currData
+
+int getK(int x, int y, int ** beliefArray) {
+    int pixel = getIndex(x, y, imageWidth);
+    int belief = numeric_limits<int>::max();
+    int currentBelief;
+    int k = 0;
+    for (int kIndex = 0; kIndex <= MAX_OFF_SET; kIndex++) {
+        currentBelief = getBelief(x,y,k,&beliefArray);
+        //currentBelief = currData[pixel].getBelief(kIndex);
+        if (currentBelief < belief) {
+            k = kIndex;
+            belief = currentBelief;
+        }//End of if statement
+    }//End of k for loop
+    return k;
+}//End of calculateBeliefs
+
+void calculateEnergy(int** belief) {
+    cout << "Calculating energy for all pixels..." << endl;
+    int borderN = WINDOW_SIZE / 2;
+    int borderS = imageHeight - (WINDOW_SIZE / 2);
+    int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+    int borderW = imageWidth - (WINDOW_SIZE / 2);
+    int energy = 0;
+    int k = 0;
+    for (int x = borderE; x <= borderW; x++) {
+        for (int y = borderN; y <= borderS; y++) {
+            k = getK(x, y);
+            int kPrimeN = getK(x, y - 1, &belief);
+            int kPrimeS = getK(x, y + 1, &belief);
+            int kPrimeE = getK(x - 1, y, &belief);
+            int kPrimeW = getK(x + 1, y, &belief);
+            int smcostOfNeighbors = smoothnessCost(k, kPrimeN) + smoothnessCost(k, kPrimeS) + smoothnessCost(k, kPrimeE) + smoothnessCost(k, kPrimeW);
+            //cout << "smcostOfNeighbors = " << smcostOfNeighbors << endl;
+            energy += dataCost(x, y, k) + smcostOfNeighbors;
+        }//End of y for loop
+    }//End of x for loop
+    cout << "Calculating energy pixels COMPLETE " << endl;
+    cout << "Energy = " << energy << endl;
+    cout << endl;
+}// end of calculateEnergy
 
 void memoizieDataCost(int** dc) {
     int borderN = WINDOW_SIZE / 2;
@@ -591,9 +590,14 @@ void loopyBP() {
     int iterations = 1;
 
     int borderN = WINDOW_SIZE / 2;
+    cout << "borderN = " << borderN << endl;
     int borderS = imageHeight - (WINDOW_SIZE / 2);
+    cout << "borderS = " << borderS << endl;
     int borderE = (WINDOW_SIZE / 2) + MAX_OFF_SET;
+    cout << "borderE = " << borderE << endl;
     int borderW = imageWidth - (WINDOW_SIZE / 2);
+    cout << "borderW = " << borderW << endl;
+    
     cout << "memoizing datacost..." << endl;
     memoizieDataCost(&dc);
     cout << "Total iterations : " << iterations << endl;
@@ -604,46 +608,59 @@ void loopyBP() {
         //for each pixel x,y
         for (int x = borderE; x < borderW; x++) {
             for (int y = borderN; y < borderS; y++) {
-                cout << "("<<x<<", "<<y<<")"<<endl;
+                //cout << "("<<x<<", "<<y<<")"<<endl;
                 for (int k = 0; k < MAX_OFF_SET; k++) {
-                    cout << "k = " << k << endl;
+                    //cout << "k = " << k << endl;
                     bMinN[k] = numeric_limits<int>::max();
                     bMinS[k] = numeric_limits<int>::max();
                     bMinE[k] = numeric_limits<int>::max();
                     bMinW[k]= numeric_limits<int>::max();
                     for (int kPrime = 0; kPrime < MAX_OFF_SET; kPrime++) {
-                        cout << "kPrime = " << kPrime << endl;
+                       //cout << "kPrime = " << kPrime << endl;
                         int dtcost = getDC(x,y,kPrime,&dc);
+                        
                         int smcost = smoothnessCost(k,kPrime);
+                        
                         int mN = getMsg(&prevMsg,SOUTH, kPrime, x, y);
                         int mS = getMsg(&prevMsg,NORTH, kPrime, x, y);
                         int mE = getMsg(&prevMsg,WEST, kPrime, x, y);
                         int mW = getMsg(&prevMsg,EAST, kPrime, x, y);
                         int mT = mN+mS+mE+mW;
                         int base = dtcost + smcost + mT;
-                        cout << "base = " << base<< endl;
+                        //cout << "base = " << base<< endl;
                         int bN = base - mN;
-                        cout << "bN = " << bN << endl;
+                        //cout << "bN = " << bN << endl;
                         int bS = base - bS;
-                        cout << "bS = " << bS << endl;
+                        //cout << "bS = " << bS << endl;
                         int bE = base - bE;
-                        cout << "bE = " << bE << endl;
+                        //cout << "bE = " << bE << endl;
                         int bW = base - bW;
-                        cout << "bW = " << bW << endl;
+                        //cout << "bW = " << bW << endl;
                         bMinN[k] = min(bMinN[k], bN);
                         bMinS[k] = min(bMinN[k], bS);
                         bMinE[k] = min(bMinN[k], bE);
-                        bMinW[k] = min(bMinN[k], bW);                      
+                        bMinW[k] = min(bMinN[k], bW); 
+                        //if (x == 36 && y==89 && k==0 && kPrime==0 ){
+                            //cout << "dtcost = " << dtcost << endl;
+                           // cout << "smoothnessCost = " << smcost << endl;
+//                            cout << "k = " << k << endl;
+//                            cout << "kPrime = " << kPrime << endl;
+//                            cout << "base = " << base << endl;
+//                            cout << "bMinN["<<k<<"] = " << bMinN[k] << endl;
+//                            cout << "bMinS["<<k<<"] = " << bMinS[k] << endl;
+//                            cout << "bMinE["<<k<<"] = " << bMinE[k] << endl;
+//                            cout << "bMinW["<<k<<"] = " << bMinW[k] << endl;
+                        //}
                     }//end of kPrime
                     //Must set all the messages an belief                 
                     setMsg(&currMsg,NORTH, k, x, y, bMinN[k]);
-                    cout << "msgNorth["<<k<<"] = " << getMsg(&currMsg, NORTH, k, x, y) << endl;
+                    //cout << "msgNorth["<<k<<"] = " << getMsg(&currMsg, NORTH, k, x, y) << endl;
                     setMsg(&currMsg,SOUTH, k, x, y, bMinS[k]);
-                    cout << "msgSouth["<<k<<"] = " << getMsg(&currMsg, SOUTH, k, x, y) << endl;
+                    //cout << "msgSouth["<<k<<"] = " << getMsg(&currMsg, SOUTH, k, x, y) << endl;
                     setMsg(&currMsg,EAST, k, x, y, bMinE[k]);
-                    cout << "msgEAST["<<k<<"] = " << getMsg(&currMsg, EAST, k, x, y) << endl;
+                    //cout << "msgEAST["<<k<<"] = " << getMsg(&currMsg, EAST, k, x, y) << endl;
                     setMsg(&currMsg,WEST, k, x, y, bMinW[k]);
-                    cout << "msgWEST["<<k<<"] = " << getMsg(&currMsg, WEST, k, x, y) << endl;
+                    //cout << "msgWEST["<<k<<"] = " << getMsg(&currMsg, WEST, k, x, y) << endl;
                     int dtcost = getDC(x,y,k,&dc);
                     int belief = bMinE[k]+bMinN[k]+bMinS[k]+bMinW[k]+dtcost;
                     setBelief(x,y,k,belief, &belief);
@@ -651,7 +668,7 @@ void loopyBP() {
             }// End of for loop for y
         }// End of for loop for x
         cout << "Iteration " << i << " COMPLETE" << endl;
-        calculateEnergy();
+        calculateEnergy(& belief);
     }//End of for loop for iterations
     cout << endl;
     cout << "All iterations are COMPLETE." << endl;
